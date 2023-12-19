@@ -5,8 +5,8 @@
 import numpy as np
 import cv2
 
-cap = cv2.VideoCapture(1)
-cap.set(10,2)
+cap = cv2.VideoCapture(0)
+cap.set(10,-2)
 
 # 全局定义段
 # 1. 饱和度增强定义

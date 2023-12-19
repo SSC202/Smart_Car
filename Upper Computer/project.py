@@ -5,10 +5,11 @@
 
 import numpy as np
 import cv2
+import serial
+import time
+import struct
 
-cap = cv2.VideoCapture(1)
-cap.set(10, 2)
-cap.set(15, -6)
+
 # 全局定义段
 # 1. 饱和度增强定义
 # 调节通道强度
@@ -17,15 +18,25 @@ lutRaisen = np.array([int(102+0.6*i) for i in range(256)]).astype("uint8")
 # 调节饱和度
 lutSRaisen = np.dstack((lutEqual, lutRaisen, lutEqual))  # Saturation raisen
 # 2. 掩膜阈值定义
-lower_ball = np.array([68, 158, 62])
-upper_ball = np.array([90, 246, 255])
+lower_ball = np.array([104, 247, 173])
+upper_ball = np.array([129, 255, 255])
 # 3. 结构元素定义
 kernel = np.ones((3, 3), np.uint8)
+# 4. Serial Port Definition
+serial_port = serial.Serial("/dev/ttyACM0",115200,timeout=0.5)
+serial_port_state = serial_port.is_open
+# 5. Capture Definition
+cap = cv2.VideoCapture(0)
+cap.set(10, -2)
+# 6. Ball Definition
+ball_x = 0.0
+ball_y = 0.0
+ball_r = 0.0
 
 #############################
 # 运行段
 #############################
-while cap.isOpened():
+while cap.isOpened() and serial_port_state:
     ##############################
     # 接收颜色图像数据
     ##############################
@@ -96,12 +107,15 @@ while cap.isOpened():
                 if pixel_count > 0.9 * np.pi * r * r:
                     filter_circle.append((x, y, r))
             if len(filter_circle) > 0:
-                print(filter_circle)
                 for cir_ in filter_circle:
+                    ball_x = cir_[0]
+                    ball_y = cir_[1]
+                    ball_r = cir_[2]
                     cv2.circle(
                         color_image, (cir_[0], cir_[1]), cir_[2], (0, 255, 255), 2)
                     cv2.circle(color_image, (cir_[0], cir_[
                         1]), 2, (255, 255, 0), 2)
+                
             else:
                 # 提取轮廓
                 contours_ball, hierarchy_ball = cv2.findContours(
@@ -117,23 +131,31 @@ while cap.isOpened():
                         areas_ball.append(cv2.contourArea(contours_ball[c]))
 
                     max_id_ball = areas_ball.index(max(areas_ball))
-                    print(max_id_ball)
-                    # 椭圆拟合
-                    if contours_ball[max_id_ball].size < 50:
+                    # 圆拟合
+                    if contours_ball[max_id_ball].size < 10:
                         pass
                     else:
                         (x_ball, y_ball), radius_ball = cv2.minEnclosingCircle(
                             contours_ball[max_id_ball])
                         center_ball = (int(x_ball), int(y_ball))
                         radius_ball = int(radius_ball)
+                        ball_x = x_ball
+                        ball_y = y_ball
+                        ball_r = radius_ball
                         cv2.circle(color_image, center_ball,
                                    radius_ball, (0, 0, 255), 3)
-
+                
         cv2.imshow('result', color_image)
-
+        print(ball_x,ball_y,ball_r)
+        ball_data = [ball_x,ball_y,ball_r]
+        pack_data = struct.pack('<BfffB',0xFF,ball_data[0],ball_data[1],ball_data[2],0xEE)
+        serial_port.write(pack_data)
+        
         key = cv2.waitKey(1)
         if key == 27:
             break
+
+        time.sleep(0.05)
     else:
         break
 
