@@ -48,7 +48,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+// State definition
+enum State state;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -105,8 +106,17 @@ int main(void)
     MX_TIM8_Init();
     MX_TIM12_Init();
     /* USER CODE BEGIN 2 */
+    Motor_Init(&motor1, 1, 200, 1, 10);
+    Motor_Init(&motor2, 2, 200, 1, 10);
+    Motor_Init(&motor3, 3, 200, 1, 10);
+    Motor_Init(&motor4, 4, 200, 1, 10);
+    Motor_Start(&motor1);
+    Motor_Start(&motor2);
+    Motor_Start(&motor3);
+    Motor_Start(&motor4);
     __HAL_UART_ENABLE_IT(&huart3, UART_IT_RXNE);
     HAL_UART_Receive_IT(&huart3, (uint8_t *)receive_buffer, 1);
+    state = IDLE_STATE;
     /* USER CODE END 2 */
 
     /* Init scheduler */

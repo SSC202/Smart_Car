@@ -46,7 +46,15 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
+enum State {
+    FIND_STATE,
+    FOLLOW_STATE,
+    GRIP_STATE,
+    IDLE_STATE,
+    READY_STATE
+};
 
+extern enum State state;
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

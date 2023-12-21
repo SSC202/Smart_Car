@@ -122,7 +122,7 @@ static void uMotor_Start(Motor *umotor)
  * @brief   电机停止函数
  * @param   umotor  电机结构体
  */
-static void Motor_Stop(Motor *umotor)
+static void uMotor_Stop(Motor *umotor)
 {
     umotor->state = Motor_STOP;
 #if (TB6612 == 1)
@@ -610,7 +610,7 @@ void Motor_Init(Motor *umotor, uint8_t ID, float KP, float KI, float KD)
     HAL_TIM_Base_Start_IT(Sample_Timer_Handle);
     __HAL_TIM_CLEAR_IT(Sample_Timer_Handle, TIM_IT_UPDATE);
     // 电机初始化
-    Motor_Stop(umotor);       /* 停止电机 */
+    uMotor_Stop(umotor);      /* 停止电机 */
     Motor_DIR_Set(umotor, 0); /* 设置正转 */
     Motor_PWM_Set(umotor, 0); /* 速度设置为0 */
     // uMotor_Start(umotor);      /* 开启电机 */
@@ -633,4 +633,13 @@ void Motor_Speed_Set(Motor *umotor, float speed)
 void Motor_Start(Motor *umotor)
 {
     uMotor_Start(umotor);
+}
+
+/**
+ * @brief   电机开启函数
+ * @param   umotor  电机结构体
+ */
+void Motor_Stop(Motor *umotor)
+{
+    uMotor_Stop(umotor);
 }

@@ -152,6 +152,7 @@ extern Motor motor4;
 void Motor_Init(Motor *umotor, uint8_t ID, float KP, float KI, float KD);
 void Motor_Speed_Set(Motor *umotor, float speed);
 void Motor_Start(Motor *umotor);
+void Motor_Stop(Motor *umotor);
 
 void Motor_TimerCallback(TIM_HandleTypeDef *htim);
 
